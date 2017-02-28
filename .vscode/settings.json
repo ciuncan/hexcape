@@ -1,0 +1,6 @@
+{
+    "nim.buildOnSave": true,
+    "nim.buildCommand": "c",
+    "nim.lintOnSave": true,
+    "nim.project": ["main.nim"],
+}

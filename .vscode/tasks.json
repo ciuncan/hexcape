@@ -1,0 +1,11 @@
+{
+    "version": "0.1.0",
+    "command": "nim",
+    "args": ["c", "main"],
+    "options": {
+        "cwd": "${workspaceRoot}"
+    },
+    "isShellCommand": true,
+    "showOutput": "always"
+
+}
