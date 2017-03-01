@@ -1,7 +1,7 @@
 {
     "version": "0.1.0",
     "command": "nim",
-    "args": ["c", "main"],
+    "args": ["c", "hexcape"],
     "options": {
         "cwd": "${workspaceRoot}"
     },

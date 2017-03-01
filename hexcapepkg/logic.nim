@@ -141,6 +141,12 @@ proc getStateAt(grid: HexGrid, coords: Point): TileState = grid.getStateAt(grid.
 proc setStateAt(grid: HexGrid, ind: int, newState: TileState) = grid.tileStates[ind] = newState
 proc setStateAt(grid: HexGrid, coords: Point, newState: TileState) = grid.setStateAt(grid.coords2Ind(coords), newState)
 
+proc isEmptyAt(grid: HexGrid, ind: int): bool = grid.getStateAt(ind) == TileState.empty
+proc isEmptyAt(grid: HexGrid, coords: Point): bool = grid.isEmptyAt(grid.coords2Ind(coords))
+
+proc isRaisedAt(grid: HexGrid, ind: int): bool = grid.getStateAt(ind) == TileState.raised
+proc isRaisedAt(grid: HexGrid, coords: Point): bool = grid.isEmptyAt(grid.coords2Ind(coords))
+
 const tileStates2Opposite: array[TileState, TileState] = [
     TileState.empty:        TileState.empty,
     TileState.collapsed:    TileState.raised,
@@ -157,7 +163,15 @@ proc flipWithNeighbors(grid: HexGrid, ind: int) =
     echo ""
 proc flipWithNeighbors(grid: HexGrid, coords: Point) = grid.flipWithNeighbors(grid.coords2Ind(coords))
 
-proc actionAt(grid: HexGrid, coords: Point) =
-    if grid.inside(coords) and grid.getStateAt(coords) != TileState.empty:
+proc actionAt(grid: HexGrid, coords: Point): bool =
+    if grid.inside(coords) and not grid.isEmptyAt(coords):
         grid.flipWithNeighbors(coords)
-proc actionAt(grid: HexGrid, ind: int) = grid.actionAt(grid.ind2Coords(ind))
+        result = true
+proc actionAt(grid: HexGrid, ind: int): bool = grid.actionAt(grid.ind2Coords(ind))
+
+proc isWin(grid: HexGrid): bool =
+    result = true
+    for ind in grid.indices:
+        if not grid.isEmptyAt(ind) and not grid.isRaisedAt(ind):
+            result = false
+            return

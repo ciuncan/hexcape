@@ -130,18 +130,25 @@ type
         grid: HexGrid
         topPos: Vector2d
         hexRadius: float
+        nMoves: int
+        isWin: bool
 
 proc newGame(renderer: RendererPtr): Game =
     new result
     result.renderer = renderer
     result.topPos = vector2d(1280/2, 100)
-    result.hexRadius = 20.0
-    result.grid = newHexGrid(10)
+    result.hexRadius = 60.0
+    result.grid = newHexGrid(4)
     result.grid.randomize()
 
     result.font = openFontRW(
         readRW("iosevka_medium.ttf"), freesrc = 1, 16)
     sdlFailIf result.font.isNil: "Failed to load font"
+
+proc reset(game: Game) =
+    game.nMoves = 0
+    game.isWin = false
+    game.grid.randomize()
 
 proc toInput(key: Scancode): Input =
     case key
@@ -261,15 +268,24 @@ proc render(game: Game) =
     # drawAngle(30)
     # drawAngle(60)
 
+    game.renderText("Moves: " & $game.nMoves, 1280 - 100, 60, colorBlack)
+    if game.isWin:
+        game.renderText("Won!", 1280 - 100, 90, colorWhite)
+
     # Show the result on screen
     game.renderer.present()
 
 proc logic(game: Game) = 
     if game.inputs[Input.mouseReleased]:
-        let coords = game.screenPos2Coords(vector2d(game.currentMousePos.x.float, game.currentMousePos.y.float))
-        game.grid.actionAt(coords)
+        if not game.isWin:
+            let coords = game.screenPos2Coords(vector2d(game.currentMousePos.x.float, game.currentMousePos.y.float))
+            if game.grid.actionAt(coords):
+                game.nMoves += 1
+            game.isWin = game.grid.isWin()
+        else:
+            game.reset()
     if game.inputs[Input.reset]:
-        game.grid.randomize()
+        game.reset()
 
 proc main =
     sdlFailIf(not sdl2.init(INIT_VIDEO or INIT_TIMER or INIT_EVENTS)):
