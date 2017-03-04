@@ -6,6 +6,7 @@ description   = "An open-source puzzle game written in Nim using SDL, inspired b
 license       = "MIT"
 
 bin           = @["hexcape"]
+# binDir        = "bin"
 
 # Dependencies
 

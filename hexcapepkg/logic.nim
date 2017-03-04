@@ -1,7 +1,6 @@
 import math
 import random
 import basic2d
-import sdl2
 
 #        ===================
 # row  //                   \\
@@ -50,128 +49,179 @@ import sdl2
 #        \ / 
 
 type 
-    TileState {.pure.} = enum empty, collapsed, raised
+    TileState* {.pure.} = enum tsEmpty, tsCollapsed, tsRaised
     # directions in clockwise order
-    Direction {.pure.} = enum bottomLeft, left, topLeft, topRight, right, bottomRight
+    TileType* {.pure.} = enum
+        ttAllNeighbors, 
+        ttLeftRight
+    HexDirection* {.pure.} = enum
+        hdBottomLeft,
+        hdLeft,
+        hdTopLeft,
+        hdTopRight,
+        hdRight,
+        hdBottomRight
 
-    HexGrid = ref object
-        width: int
+    HexGrid* = ref object
+        width*: int
         tileStates: seq[TileState]
+        tileTypes: seq[TileType]
+    
+    Coords* = object
+        x*, y*: int
 
-proc newHexGrid(width: int, tileStates: seq[TileState]): HexGrid =
+proc newHexGrid(width: int, tileStates: seq[TileState], tileTypes: seq[TileType]): HexGrid =
     new result
     result.width = width
     result.tileStates = tileStates
+    result.tileTypes = tileTypes
 
-proc newHexGrid(width: int): HexGrid =
-    var s = newSeq[TileState](width * width)
-    newHexGrid(width, s)
+proc newHexGrid*(width: int): HexGrid =
+    let
+        nTiles = width * width
+        states = newSeq[TileState](nTiles)
+        types = newSeq[TileType](nTiles)
+    newHexGrid(width, states, types)
+
+proc newCoords*(x, y: int): Coords = 
+    result.x = x
+    result.y = y
 
 proc nTiles(grid: HexGrid): int = grid.width * grid.width
 
-proc ind2Coords(grid: HexGrid, ind: int): Point =
-    point(ind mod grid.width, ind div grid.width)
-
-proc coords2Ind(grid: HexGrid, coords: Point): int =
-    coords.x + coords.y * grid.width
+proc ind2Coords*(grid: HexGrid, ind: int): Coords = newCoords(ind mod grid.width, ind div grid.width)
+proc coords2Ind*(grid: HexGrid, coords: Coords): int = coords.x + coords.y * grid.width
 
 iterator indices*(grid: HexGrid): int = 
-    for i in countup(0, grid.nTiles - 1):
+    for i in 0 ..< grid.nTiles:
         yield i
 
-iterator coords*(grid: HexGrid): Point = 
+iterator coords*(grid: HexGrid): Coords = 
     for i in grid.indices:
         yield grid.ind2Coords(i)
 
-proc inside(grid: HexGrid, coords: Point): bool =
+proc inside(grid: HexGrid, ind: int): bool = ind >= 0 and ind < grid.nTiles
+proc inside(grid: HexGrid, coords: Coords): bool =
     coords.x >= 0 and coords.y >= 0 and coords.x < grid.width and coords.y < grid.width
 
-proc randomize(grid: HexGrid) =
+proc randomize*(grid: HexGrid) =
     for i in grid.indices:
         grid.tileStates[i] = TileState(random(high(TileState).int + 1))
 
-const directions2Offsets: array[Direction, Point] = [
-    Direction.bottomLeft:   point( 0, 1),
-    Direction.left:         point(-1, 1),
-    Direction.topLeft:      point(-1, 0),
-    Direction.topRight:     point( 0,-1),
-    Direction.right:        point( 1,-1),
-    Direction.bottomRight:  point( 1, 0)
+const directions2Angles*: array[HexDirection, float] = [
+    HexDirection.hdBottomLeft:   120.0.degToRad,
+    HexDirection.hdLeft:         180.0.degToRad,
+    HexDirection.hdTopLeft:      240.0.degToRad,
+    HexDirection.hdTopRight:     300.0.degToRad,
+    HexDirection.hdRight:          0.0.degToRad,
+    HexDirection.hdBottomRight:   60.0.degToRad 
+]
+const directions2Vectors*: array[HexDirection, Vector2d] = [
+    HexDirection.hdBottomLeft:   polarVector2d(directions2Angles[HexDirection.hdBottomLeft],  1.0),
+    HexDirection.hdLeft:         polarVector2d(directions2Angles[HexDirection.hdLeft],        1.0),
+    HexDirection.hdTopLeft:      polarVector2d(directions2Angles[HexDirection.hdTopLeft],     1.0),
+    HexDirection.hdTopRight:     polarVector2d(directions2Angles[HexDirection.hdTopRight],    1.0),
+    HexDirection.hdRight:        polarVector2d(directions2Angles[HexDirection.hdRight],       1.0),
+    HexDirection.hdBottomRight:  polarVector2d(directions2Angles[HexDirection.hdBottomRight], 1.0) 
+]
+const
+    forwardVector*   = directions2Vectors[HexDirection.hdBottomRight]
+    downwardVector*  = directions2Vectors[HexDirection.hdBottomLeft]
+
+const directions2CoordsOffsets: array[HexDirection, Coords] = [
+    HexDirection.hdBottomLeft:   newCoords( 0, 1),
+    HexDirection.hdLeft:         newCoords(-1, 1),
+    HexDirection.hdTopLeft:      newCoords(-1, 0),
+    HexDirection.hdTopRight:     newCoords( 0,-1),
+    HexDirection.hdRight:        newCoords( 1,-1),
+    HexDirection.hdBottomRight:  newCoords( 1, 0)
 ]
 
-proc `+`(p1, p2: Point): Point = point(p1.x + p2.x, p1.y + p2.y)
+proc `+`*(p1, p2: Coords): Coords = newCoords(p1.x + p2.x, p1.y + p2.y)
 
-iterator getNeighborTiles*(grid: HexGrid, coords: Point): Point =
-    for dirOrd in ord(low(Direction)) .. ord(high(Direction)):
+template enumRange(enumType: typedesc): untyped = enumType.low.ord .. enumType.high.ord
+template iterateEnum(v: untyped, enumType: typedesc, body: untyped): untyped =
+    for i in enumRange(enumType):
+        let v = enumType(i)
+        body
+
+iterator getNeighborTiles(grid: HexGrid, coords: Coords): Coords =
+    iterateEnum(dir, HexDirection):
         let
-            dir = Direction(dirOrd)
-            offset = directions2Offsets[dir]
+            offset = directions2CoordsOffsets[dir]
             neighCand = coords + offset
         if grid.inside(neighCand):
             yield neighCand
 
-iterator getNeighborTiles*(grid: HexGrid, ind: int): Point =
+iterator getNeighborTiles(grid: HexGrid, ind: int): Coords =
     let coords = grid.ind2Coords(ind)
     for neighbor in grid.getNeighborTiles(coords):
         yield neighbor
 
-iterator getNeighborTilesAndSelf*(grid: HexGrid, coords: Point): Point =
+iterator getNeighborTilesAndSelf(grid: HexGrid, coords: Coords): Coords =
     yield coords
     for neighbor in grid.getNeighborTiles(coords):
         yield neighbor
 
-iterator getNeighborTilesAndSelf*(grid: HexGrid, ind: int): Point =
+iterator getNeighborTilesAndSelf(grid: HexGrid, ind: int): Coords =
     let coords = grid.ind2Coords(ind)
     for neighbor in grid.getNeighborTilesAndSelf(coords):
         yield neighbor
 
-proc test_getNeighborTiles =
-    let hexGrid = newHexGrid(4)
+proc getStateAt*(grid: HexGrid, ind: int): TileState = grid.tileStates[ind]
+proc getStateAt*(grid: HexGrid, coords: Coords): TileState = grid.getStateAt(grid.coords2Ind(coords))
 
-    for i in countup(0, 15):
-        let coords = hexGrid.ind2Coords(i)
-        stdout.write $i & "(" & $coords & " = " & $hexGrid.coords2Ind(coords) & ") -> " 
-        for neighbor in hexGrid.getNeighborTiles(i):
-            stdout.write $hexGrid.coords2Ind(neighbor) & ", "
-        echo ""
-
-proc getStateAt(grid: HexGrid, ind: int): TileState = grid.tileStates[ind]
-proc getStateAt(grid: HexGrid, coords: Point): TileState = grid.getStateAt(grid.coords2Ind(coords))
+proc `[]`(grid: HexGrid, ind: int): TileState = grid.getStateAt(ind)
+proc `[]`(grid: HexGrid, coords: Coords): TileState = grid.getStateAt(coords)
 
 proc setStateAt(grid: HexGrid, ind: int, newState: TileState) = grid.tileStates[ind] = newState
-proc setStateAt(grid: HexGrid, coords: Point, newState: TileState) = grid.setStateAt(grid.coords2Ind(coords), newState)
+proc setStateAt(grid: HexGrid, coords: Coords, newState: TileState) = grid.setStateAt(grid.coords2Ind(coords), newState)
 
-proc isEmptyAt(grid: HexGrid, ind: int): bool = grid.getStateAt(ind) == TileState.empty
-proc isEmptyAt(grid: HexGrid, coords: Point): bool = grid.isEmptyAt(grid.coords2Ind(coords))
+proc `[]=`(grid: HexGrid, ind: int, newState: TileState) = grid.setStateAt(ind, newState)
+proc `[]=`(grid: HexGrid, coords: Coords, newState: TileState) = grid[grid.coords2Ind(coords)] = newState
 
-proc isRaisedAt(grid: HexGrid, ind: int): bool = grid.getStateAt(ind) == TileState.raised
-proc isRaisedAt(grid: HexGrid, coords: Point): bool = grid.isEmptyAt(grid.coords2Ind(coords))
+proc isEmptyAt*(grid: HexGrid, ind: int): bool = grid[ind] == TileState.tsEmpty
+proc isEmptyAt*(grid: HexGrid, coords: Coords): bool = grid.isEmptyAt(grid.coords2Ind(coords))
+
+proc isRaisedAt(grid: HexGrid, ind: int): bool = grid[ind] == TileState.tsRaised
+proc isRaisedAt(grid: HexGrid, coords: Coords): bool = grid.isRaisedAt(grid.coords2Ind(coords))
+
+proc isVoidAt(grid: HexGrid, ind: int): bool = not grid.inside(ind) or grid.isEmptyAt(ind)
+proc isVoidAt(grid: HexGrid, coords: Coords): bool = grid.isVoidAt(grid.coords2Ind(coords))
 
 const tileStates2Opposite: array[TileState, TileState] = [
-    TileState.empty:        TileState.empty,
-    TileState.collapsed:    TileState.raised,
-    TileState.raised:       TileState.collapsed
+    TileState.tsEmpty:      TileState.tsEmpty,
+    TileState.tsCollapsed:  TileState.tsRaised,
+    TileState.tsRaised:     TileState.tsCollapsed
 ]
 
-proc flipStateAt(grid: HexGrid, ind: int) = grid.setStateAt(ind, tileStates2Opposite[grid.getStateAt(ind)])
-proc flipStateAt(grid: HexGrid, coords: Point) = grid.flipStateAt(grid.coords2Ind(coords))
+proc flipStateAt(grid: HexGrid, ind: int) = grid[ind] = tileStates2Opposite[grid[ind]]
+proc flipStateAt(grid: HexGrid, coords: Coords) = grid.flipStateAt(grid.coords2Ind(coords))
 
 proc flipWithNeighbors(grid: HexGrid, ind: int) =
     for neighbor in grid.getNeighborTilesAndSelf(ind):
-        stdout.write $neighbor & ", "
         grid.flipStateAt(neighbor)
-    echo ""
-proc flipWithNeighbors(grid: HexGrid, coords: Point) = grid.flipWithNeighbors(grid.coords2Ind(coords))
+proc flipWithNeighbors(grid: HexGrid, coords: Coords) = grid.flipWithNeighbors(grid.coords2Ind(coords))
 
-proc actionAt(grid: HexGrid, coords: Point): bool =
-    if grid.inside(coords) and not grid.isEmptyAt(coords):
-        grid.flipWithNeighbors(coords)
+proc actionAt*(grid: HexGrid, ind: int): bool =
+    if not grid.isVoidAt(ind):
+        grid.flipWithNeighbors(ind)
         result = true
-proc actionAt(grid: HexGrid, ind: int): bool = grid.actionAt(grid.ind2Coords(ind))
+proc actionAt*(grid: HexGrid, coords: Coords): bool = grid.actionAt(grid.coords2Ind(coords))
 
-proc isWin(grid: HexGrid): bool =
+proc isWin*(grid: HexGrid): bool =
     result = true
     for ind in grid.indices:
         if not grid.isEmptyAt(ind) and not grid.isRaisedAt(ind):
             result = false
             return
+
+when isMainModule:
+    let hexGrid = newHexGrid(4)
+
+    for i in 0 .. hexGrid.nTiles:
+        let coords = hexGrid.ind2Coords(i)
+        stdout.write $i & "(" & $coords & " = " & $hexGrid.coords2Ind(coords) & ") -> " 
+        for neighbor in hexGrid.getNeighborTiles(i):
+            stdout.write $hexGrid.coords2Ind(neighbor) & ", "
+        echo ""
