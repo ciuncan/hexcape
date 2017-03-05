@@ -19,15 +19,12 @@ task html5, "Generate HTML5 game":
     exec "nim js -d:browser hexcape.nim"
 
 task index, "":
-    let
-        pre = "'<html><body oncontextmenu=''return false;'' style=''margin: 0''><script>'"
-        post = "'</script></body></html>'"
-    echo "rm www/index.html"
-    echo "touch www/index.html"
-    exec "echo " & $pre & " | tee -a ./www/index.html > /dev/null"
-    exec "cat nimcache/hexcape.js | tee -a ./www/index.html > /dev/null"
-    exec "echo " & $post & " | tee -a ./www/index.html > /dev/null"
-
+    exec "touch www/index.html"
+    exec "rm www/index.html"
+    exec "touch www/index.html"
+    exec "cat www/_index_pre.html   | tee -a www/index.html > /dev/null"
+    exec "cat nimcache/hexcape.js   | tee -a www/index.html > /dev/null"
+    exec "cat www/_index_post.html  | tee -a www/index.html > /dev/null"
 
 task serve, "Serve html files":
     exec "cd www; http-server"
