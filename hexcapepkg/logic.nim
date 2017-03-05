@@ -49,39 +49,68 @@ import basic2d
 #        \ / 
 
 type 
-    TileState* {.pure.} = enum tsEmpty, tsCollapsed, tsRaised
     # directions in clockwise order
-    TileType* {.pure.} = enum
-        ttAllNeighbors, 
-        ttLeftRight
     HexDirection* {.pure.} = enum
-        hdBottomLeft,
-        hdLeft,
-        hdTopLeft,
-        hdTopRight,
-        hdRight,
-        hdBottomRight
+        bottomLeft,
+        left,
+        topLeft,
+        topRight,
+        right,
+        bottomRight
+
+    TileState* {.pure.} = enum empty, collapsed, raised
+
+    TileEffect* = ref object of RootObj
+    NeighborTileEffect* = ref object of TileEffect
+    LinearTileEffect* = ref object of TileEffect
+        direction*: HexDirection
+        ignoreEmpty: bool
 
     HexGrid* = ref object
         width*: int
         tileStates: seq[TileState]
-        tileTypes: seq[TileType]
+        tileEffects: seq[TileEffect]
     
     Coords* = object
         x*, y*: int
 
-proc newHexGrid(width: int, tileStates: seq[TileState], tileTypes: seq[TileType]): HexGrid =
+proc `$`(coords: Coords): string = "C(" & $coords.x & ", " & $coords.y & ")"
+
+method affect(e: TileEffect, grid: HexGrid, coords: Coords) {.base.} =
+  # override this base method
+  quit "to override!"
+
+template enumRand(enumType: typedesc): untyped = enumType(random(enumType.high.ord + 1))
+template enumRange(enumType: typedesc): untyped = enumType.low.ord .. enumType.high.ord
+template enumIterate(enumType: typedesc, v: untyped, body: untyped): untyped =
+    for i in enumRange(enumType):
+        let v = enumType(i)
+        body
+
+proc newNeighborTileEffect: NeighborTileEffect = new result
+proc newLinearTileEffect(dir: HexDirection, ignoreEmpty = false): LinearTileEffect =
+    new result
+    result.direction = dir
+    result.ignoreEmpty = ignoreEmpty
+proc newLinearTileEffect: LinearTileEffect =
+    newLinearTileEffect(
+        enumRand(HexDirection),
+        random(2) == 0)
+
+proc newHexGrid(width: int, states: seq[TileState], effects: seq[TileEffect]): HexGrid =
     new result
     result.width = width
-    result.tileStates = tileStates
-    result.tileTypes = tileTypes
+    result.tileStates = states
+    result.tileEffects = effects
 
 proc newHexGrid*(width: int): HexGrid =
     let
         nTiles = width * width
         states = newSeq[TileState](nTiles)
-        types = newSeq[TileType](nTiles)
-    newHexGrid(width, states, types)
+    var effects = newSeq[TileEffect](nTiles)
+    for i in 0 ..< nTiles:
+        effects[i] = newNeighborTileEffect()
+    newHexGrid(width, states, effects)
 
 proc newCoords*(x, y: int): Coords = 
     result.x = x
@@ -106,47 +135,51 @@ proc inside(grid: HexGrid, coords: Coords): bool =
 
 proc randomize*(grid: HexGrid) =
     for i in grid.indices:
-        grid.tileStates[i] = TileState(random(high(TileState).int + 1))
+        grid.tileStates[i] = enumRand(TileState)
+        grid.tileEffects[i] = if random(2) == 0: newNeighborTileEffect()
+                              else:              newLinearTileEffect()
 
 const directions2Angles*: array[HexDirection, float] = [
-    HexDirection.hdBottomLeft:   120.0.degToRad,
-    HexDirection.hdLeft:         180.0.degToRad,
-    HexDirection.hdTopLeft:      240.0.degToRad,
-    HexDirection.hdTopRight:     300.0.degToRad,
-    HexDirection.hdRight:          0.0.degToRad,
-    HexDirection.hdBottomRight:   60.0.degToRad 
+    HexDirection.bottomLeft:   120.0.degToRad,
+    HexDirection.left:         180.0.degToRad,
+    HexDirection.topLeft:      240.0.degToRad,
+    HexDirection.topRight:     300.0.degToRad,
+    HexDirection.right:          0.0.degToRad,
+    HexDirection.bottomRight:   60.0.degToRad 
+]
+const directions2Opposites*: array[HexDirection, HexDirection] = [
+    HexDirection.bottomLeft:   HexDirection.topRight,
+    HexDirection.left:         HexDirection.right,
+    HexDirection.topLeft:      HexDirection.bottomRight,
+    HexDirection.topRight:     HexDirection.bottomLeft,
+    HexDirection.right:        HexDirection.left,
+    HexDirection.bottomRight:  HexDirection.topLeft 
 ]
 const directions2Vectors*: array[HexDirection, Vector2d] = [
-    HexDirection.hdBottomLeft:   polarVector2d(directions2Angles[HexDirection.hdBottomLeft],  1.0),
-    HexDirection.hdLeft:         polarVector2d(directions2Angles[HexDirection.hdLeft],        1.0),
-    HexDirection.hdTopLeft:      polarVector2d(directions2Angles[HexDirection.hdTopLeft],     1.0),
-    HexDirection.hdTopRight:     polarVector2d(directions2Angles[HexDirection.hdTopRight],    1.0),
-    HexDirection.hdRight:        polarVector2d(directions2Angles[HexDirection.hdRight],       1.0),
-    HexDirection.hdBottomRight:  polarVector2d(directions2Angles[HexDirection.hdBottomRight], 1.0) 
+    HexDirection.bottomLeft:   polarVector2d(directions2Angles[HexDirection.bottomLeft],  1.0),
+    HexDirection.left:         polarVector2d(directions2Angles[HexDirection.left],        1.0),
+    HexDirection.topLeft:      polarVector2d(directions2Angles[HexDirection.topLeft],     1.0),
+    HexDirection.topRight:     polarVector2d(directions2Angles[HexDirection.topRight],    1.0),
+    HexDirection.right:        polarVector2d(directions2Angles[HexDirection.right],       1.0),
+    HexDirection.bottomRight:  polarVector2d(directions2Angles[HexDirection.bottomRight], 1.0) 
 ]
 const
-    forwardVector*   = directions2Vectors[HexDirection.hdBottomRight]
-    downwardVector*  = directions2Vectors[HexDirection.hdBottomLeft]
+    forwardVector*   = directions2Vectors[HexDirection.bottomRight]
+    downwardVector*  = directions2Vectors[HexDirection.bottomLeft]
 
 const directions2CoordsOffsets: array[HexDirection, Coords] = [
-    HexDirection.hdBottomLeft:   newCoords( 0, 1),
-    HexDirection.hdLeft:         newCoords(-1, 1),
-    HexDirection.hdTopLeft:      newCoords(-1, 0),
-    HexDirection.hdTopRight:     newCoords( 0,-1),
-    HexDirection.hdRight:        newCoords( 1,-1),
-    HexDirection.hdBottomRight:  newCoords( 1, 0)
+    HexDirection.bottomLeft:   newCoords( 0, 1),
+    HexDirection.left:         newCoords(-1, 1),
+    HexDirection.topLeft:      newCoords(-1, 0),
+    HexDirection.topRight:     newCoords( 0,-1),
+    HexDirection.right:        newCoords( 1,-1),
+    HexDirection.bottomRight:  newCoords( 1, 0)
 ]
 
 proc `+`*(p1, p2: Coords): Coords = newCoords(p1.x + p2.x, p1.y + p2.y)
 
-template enumRange(enumType: typedesc): untyped = enumType.low.ord .. enumType.high.ord
-template iterateEnum(v: untyped, enumType: typedesc, body: untyped): untyped =
-    for i in enumRange(enumType):
-        let v = enumType(i)
-        body
-
 iterator getNeighborTiles(grid: HexGrid, coords: Coords): Coords =
-    iterateEnum(dir, HexDirection):
+    HexDirection.enumIterate(dir):
         let
             offset = directions2CoordsOffsets[dir]
             neighCand = coords + offset
@@ -180,19 +213,19 @@ proc setStateAt(grid: HexGrid, coords: Coords, newState: TileState) = grid.setSt
 proc `[]=`(grid: HexGrid, ind: int, newState: TileState) = grid.setStateAt(ind, newState)
 proc `[]=`(grid: HexGrid, coords: Coords, newState: TileState) = grid[grid.coords2Ind(coords)] = newState
 
-proc isEmptyAt*(grid: HexGrid, ind: int): bool = grid[ind] == TileState.tsEmpty
+proc isEmptyAt*(grid: HexGrid, ind: int): bool = grid[ind] == TileState.empty
 proc isEmptyAt*(grid: HexGrid, coords: Coords): bool = grid.isEmptyAt(grid.coords2Ind(coords))
 
-proc isRaisedAt(grid: HexGrid, ind: int): bool = grid[ind] == TileState.tsRaised
+proc isRaisedAt(grid: HexGrid, ind: int): bool = grid[ind] == TileState.raised
 proc isRaisedAt(grid: HexGrid, coords: Coords): bool = grid.isRaisedAt(grid.coords2Ind(coords))
 
 proc isVoidAt(grid: HexGrid, ind: int): bool = not grid.inside(ind) or grid.isEmptyAt(ind)
-proc isVoidAt(grid: HexGrid, coords: Coords): bool = grid.isVoidAt(grid.coords2Ind(coords))
+proc isVoidAt(grid: HexGrid, coords: Coords): bool = not grid.inside(coords) or grid.isEmptyAt(coords)
 
 const tileStates2Opposite: array[TileState, TileState] = [
-    TileState.tsEmpty:      TileState.tsEmpty,
-    TileState.tsCollapsed:  TileState.tsRaised,
-    TileState.tsRaised:     TileState.tsCollapsed
+    TileState.empty:      TileState.empty,
+    TileState.collapsed:  TileState.raised,
+    TileState.raised:     TileState.collapsed
 ]
 
 proc flipStateAt(grid: HexGrid, ind: int) = grid[ind] = tileStates2Opposite[grid[ind]]
@@ -203,9 +236,26 @@ proc flipWithNeighbors(grid: HexGrid, ind: int) =
         grid.flipStateAt(neighbor)
 proc flipWithNeighbors(grid: HexGrid, coords: Coords) = grid.flipWithNeighbors(grid.coords2Ind(coords))
 
+proc getEffectAt*(grid: HexGrid, ind: int): TileEffect = grid.tileEffects[ind]
+proc getEffectAt*(grid: HexGrid, coords: Coords): TileEffect = grid.getEffectAt(grid.coords2Ind(coords))
+
+method affect(e: NeighborTileEffect, grid: HexGrid, coords: Coords) = grid.flipWithNeighbors(coords)
+method affect(e: LinearTileEffect, grid: HexGrid, coords: Coords) =
+    grid.flipStateAt(coords)
+    for opposite in @[false, true]:
+        let
+            dir = if opposite: directions2Opposites[e.direction] else: e.direction
+            offset = directions2CoordsOffsets[dir]
+        var next = coords + offset
+        # TODO maybe decide if check only inside allowed?
+        # while (if e.ignoreEmpty: grid.inside(next) else: not grid.isVoidAt(next)):
+        while not grid.isVoidAt(next):
+            grid.flipStateAt(next)
+            next = next + offset
+
 proc actionAt*(grid: HexGrid, ind: int): bool =
     if not grid.isVoidAt(ind):
-        grid.flipWithNeighbors(ind)
+        grid.tileEffects[ind].affect(grid, grid.ind2Coords(ind))
         result = true
 proc actionAt*(grid: HexGrid, coords: Coords): bool = grid.actionAt(grid.coords2Ind(coords))
 

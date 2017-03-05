@@ -25,9 +25,9 @@ proc drawNGon*(ctx: CanvasRenderingContext2D, center: Vector2d, radius: float,
     drawNGon(ctx, points)
 
 const tileStates2Colors: array[TileState, cstring] = [
-    TileState.tsEmpty:        rgb(  0,   0,   0),
-    TileState.tsCollapsed:    rgb(200, 200, 255),
-    TileState.tsRaised:       rgb( 80, 120, 240)
+    TileState.empty:        rgb(  0,   0,   0),
+    TileState.collapsed:    rgb(200, 200, 255),
+    TileState.raised:       rgb( 80, 120, 240)
 ]
 
 type
@@ -113,22 +113,31 @@ proc screenPos2Coords(game: Game, pos: Vector2d): Coords =
     result.x = (proj.x + 0.5).int
     result.y = (proj.y + 0.5).int
 
+const
+    width = 1280
+    height = 720
+
 proc drawHexGrid(game: Game) =
     for coords in game.grid.coords:
         let
             ind = game.grid.coords2ind(coords)
             currentCenter = game.coords2ScreenPos(coords)
             color = tileStates2Colors[game.grid.getStateAt(ind)]
+            effect = game.grid.getEffectAt(ind)
         if game.grid.isEmptyAt(ind):
             continue
         game.renderer.fillStyle = rgb(colBlack)
         game.renderer.drawNGon(currentCenter + vector2d(2.0,2.0), game.hexRadius, n = 6, rotate = 30.0)
         game.renderer.fillStyle = color
         game.renderer.drawNGon(currentCenter, game.hexRadius, n = 6, rotate = 30.0)
+        if effect of LinearTileEffect:
+            for sign in @[-1.0, 1.0]:
+                let
+                    vec = directions2Vectors[effect.LinearTileEffect.direction] * sign
+                    cen = currentCenter + vec * game.hexRadius / 3
+                game.renderer.fillStyle = rgb(colBlack)
+                game.renderer.drawNGon(cen, game.hexRadius / 8, n = 30)
 
-const
-    width = 1280
-    height = 720
 
 proc render(game: Game) =
     # Draw over all drawings of the last frame with the default

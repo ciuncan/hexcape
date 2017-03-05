@@ -92,9 +92,9 @@ proc loadFont*() =
  
 
 const tileStates2Colors: array[TileState, Color] = [
-    TileState.tsEmpty:        rgb(  0,   0,   0),
-    TileState.tsCollapsed:    rgb(200, 200, 255),
-    TileState.tsRaised:       rgb( 80, 120, 240)
+    TileState.empty:        rgb(  0,   0,   0),
+    TileState.collapsed:    rgb(200, 200, 255),
+    TileState.raised:       rgb( 80, 120, 240)
 ]
 
 type
@@ -193,10 +193,19 @@ proc drawHexGrid(game: Game) =
             ind = game.grid.coords2ind(coords)
             currentCenter = game.coords2ScreenPos(coords)
             color = tileStates2Colors[game.grid.getStateAt(ind)]
+            effect = game.grid.getEffectAt(ind)
         if game.grid.isEmptyAt(ind):
             continue
         game.renderer.drawNGon(currentCenter + vector2d(2.0,2.0), game.hexRadius, colBlack, n = 6, rotate = 30.0)
         game.renderer.drawNGon(currentCenter, game.hexRadius, color, n = 6, rotate = 30.0)
+        if effect of LinearTileEffect:
+            for sign in @[-1.0, 1.0]:
+                let
+                    vec = directions2Vectors[effect.LinearTileEffect.direction] * sign
+                    cen = currentCenter + vec * game.hexRadius / 3
+                game.renderer.drawNGon(cen, game.hexRadius / 8, colBlack, n = 30)
+
+
     
 
 proc render(game: Game) =
