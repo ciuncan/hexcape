@@ -92,13 +92,13 @@ proc reset(game: Game) =
 # [ b_x  b_y   0 ] = matrix2d(a_x, a_y, b_x, b_y, t_x, t_y)
 # [ t_x  t_y   1 ]
 proc coords2ScreenPos(game: Game, coords: Coords): Vector2d =
-    let 
+    let
         c = point2d(coords.x.float, coords.y.float)
         xform = matrix2d(forwardVector.x, forwardVector.y, downwardVector.x, downwardVector.y, 0, 0) & scale(2*game.hexRadius) & move(game.topPos)
         p = c & xform
     result.x = p.x
     result.y = p.y
-    # game.topPos + forwardVector * coords.x.float * 2*game.hexRadius 
+    # game.topPos + forwardVector * coords.x.float * 2*game.hexRadius
                 # + downwardVector * coords.y.float * 2*game.hexRadius
 
 #                                     ([ f_x  f_y  0 ]   [ 2r  0  0 ]   [  1    0    0 ]) -1
@@ -156,7 +156,7 @@ proc render(game: Game) =
         game.renderer.fillStyle = rgb(colWhite)
         game.renderer.renderText("Won!", 1280 - 100, 90)
 
-proc logic(game: Game) = 
+proc logic(game: Game) =
     if Input.iMouseReleased in game.inputs:
         if not game.isWin:
             let coords = game.screenPos2Coords(vector2d(game.currentMousePos.x, game.currentMousePos.y))
@@ -173,7 +173,7 @@ proc logic(game: Game) =
 
 proc requestAnimationFrame(drawFn: proc()) {.importc.}
 
-var 
+var
     canvasId    = "canvas"
     old         = document.getElementById(canvasId).Canvas
     canvas      = if not old.isNil: old else: document.createElement(canvasId).Canvas
@@ -188,7 +188,7 @@ proc log(txt: string) {.inline.} = {.emit: ["console.log(", txt, ");"].}
 
 
 proc relative(ev: Event): Point2d =
-    let 
+    let
         x = ev.x.float
         y = ev.y.float
         ol = ev.target.offsetLeft
@@ -227,4 +227,3 @@ proc loop() =
 
 proc main* =
     loop()
-    

@@ -20,8 +20,6 @@ template sdlFailIf*(cond: typed, reason: string) =
 var font: FontPtr
 
 proc renderText*(ctx: RendererPtr, text: string, x, y: cint, c: Color) =
-
-
     let
         (r, g, b) = extractRGB(c)
         surface = font.renderUtf8Solid(text.cstring, (r.uint8, g.uint8, b.uint8, 255.uint8))
@@ -52,9 +50,9 @@ proc drawNGon*(ctx: RendererPtr, points: seq[Point2d], c: Color = colWhite) =
     for i, p in points.pairs:
         xs[i] = p.x.int16
         ys[i] = p.y.int16
-    
+
     ctx.filledPolygonRGBA(addr xs[0], addr ys[0], n, r.uint8, g.uint8, b.uint8, 255)
-    
+
 
 proc drawNGon*(ctx: RendererPtr, center: Vector2d, radius: float,
               c: Color = colWhite, n = 6, rotate = 0.0) =
@@ -89,7 +87,7 @@ proc loadFont*() =
     font = openFontRW(
         readRW("iosevka_medium.ttf"), freesrc = 1, 16)
     sdlFailIf font.isNil: "Failed to load font"
- 
+
 
 const tileStates2Colors: array[TileState, Color] = [
     TileState.empty:        rgb(  0,   0,   0),
@@ -166,13 +164,13 @@ proc handleInput(game: Game) =
 # [ b_x  b_y   0 ] = matrix2d(a_x, a_y, b_x, b_y, t_x, t_y)
 # [ t_x  t_y   1 ]
 proc coords2ScreenPos(game: Game, coords: Coords): Vector2d =
-    let 
+    let
         c = point2d(coords.x.float, coords.y.float)
         xform = matrix2d(forwardVector.x, forwardVector.y, downwardVector.x, downwardVector.y, 0, 0) & scale(2*game.hexRadius) & move(game.topPos)
         p = c & xform
     result.x = p.x
     result.y = p.y
-    # game.topPos + forwardVector * coords.x.float * 2*game.hexRadius 
+    # game.topPos + forwardVector * coords.x.float * 2*game.hexRadius
                 # + downwardVector * coords.y.float * 2*game.hexRadius
 
 #                                     ([ f_x  f_y  0 ]   [ 2r  0  0 ]   [  1    0    0 ]) -1
@@ -206,7 +204,7 @@ proc drawHexGrid(game: Game) =
                 game.renderer.drawNGon(cen, game.hexRadius / 8, colBlack, n = 30)
 
 
-    
+
 
 proc render(game: Game) =
     # Draw over all drawings of the last frame with the default
@@ -225,7 +223,7 @@ proc render(game: Game) =
     # Show the result on screen
     game.renderer.present()
 
-proc logic(game: Game) = 
+proc logic(game: Game) =
     if Input.iMouseReleased in game.inputs:
         if not game.isWin:
             let coords = game.screenPos2Coords(vector2d(game.currentMousePos.x.float, game.currentMousePos.y.float))
@@ -240,14 +238,14 @@ proc logic(game: Game) =
 proc main* =
     sdlFailIf(not sdl2.init(INIT_VIDEO or INIT_TIMER or INIT_EVENTS)):
         "SDL2 initialization failed"
-    
+
     # defer blocks get called at the end of the procedure, even if an
     # exception has been thrown
     defer: sdl2.quit()
 
     sdlFailIf(not setHint("SDL_RENDER_SCALE_QUALITY", "2")):
         "Linear texture filtering could not be enabled"
-    
+
     let window = createWindow(title = "Hexcape",
         x = SDL_WINDOWPOS_CENTERED, y = SDL_WINDOWPOS_CENTERED,
         w = 1280, h = 720, flags = SDL_WINDOW_SHOWN)
@@ -275,7 +273,7 @@ proc main* =
     # var
     #     startTime = epochTime()
     #     lastTick = 0
-    
+
     # Game loop, draws each frame
     while Input.iQuit notin game.inputs:
         game.handleInput()

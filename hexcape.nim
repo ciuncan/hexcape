@@ -4,7 +4,7 @@
 # https://nim-lang.org/docs/random.html#random,int
 # https://nim-by-example.github.io/oop/
 # https://nim-lang.org/docs/tut1.html#advanced-types-tuples
-when defined(browser):
+when defined(js):
     from hexcapepkg.html5_game import main
 else:
     from hexcapepkg.sdl_game import main

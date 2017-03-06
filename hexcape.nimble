@@ -16,7 +16,7 @@ requires "html5_canvas >= 0.1.0"
 
 task html5, "Generate HTML5 game":
     bin = @["hexcape.js"]
-    exec "nim js -d:browser hexcape.nim"
+    exec "nim js hexcape.nim"
 
 task index, "":
     exec "touch www/index.html"
@@ -27,4 +27,6 @@ task index, "":
     exec "cat www/_index_post.html  | tee -a www/index.html > /dev/null"
 
 task serve, "Serve html files":
+    exec "nimble html5"
+    exec "nimble index"
     exec "cd www; http-server"

@@ -664,11 +664,11 @@ var result_56135 = null;
 var F={procname:"logic.newHexGrid",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
 result_56135 = {width: 0, tileStates: null, tileEffects: null};
-F.line = 102;
+F.line = 105;
 result_56135.width = width_56130;
-F.line = 103;
+F.line = 106;
 result_56135.tileStates = nimCopy(null, states_56132, NTI56131);
-F.line = 104;
+F.line = 107;
 result_56135.tileEffects = nimCopy(null, effects_56134, NTI56133);
 framePtr = F.prev;
 return result_56135;
@@ -678,15 +678,15 @@ function newHexGrid_56144(width_56146) {
 var result_56147 = null;
 var F={procname:"logic.newHexGrid",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 107;
-F.line = 108;
-var nTiles_56148 = mulInt(width_56146, width_56146);
-F.line = 109;
-var states_56187 = newSeq_56162(chckRange(nTiles_56148, 0, 2147483647));
 F.line = 110;
+F.line = 111;
+var nTiles_56148 = mulInt(width_56146, width_56146);
+F.line = 112;
+var states_56187 = newSeq_56162(chckRange(nTiles_56148, 0, 2147483647));
+F.line = 113;
 var effects_56226 = newSeq_56201(chckRange(nTiles_56148, 0, 2147483647));
 L1: do {
-F.line = 111;
+F.line = 114;
 var i_56236 = 0;
 F.line = 3715;
 var i_56240 = 0;
@@ -696,7 +696,7 @@ L3: while (true) {
 if (!(i_56240 < nTiles_56148)) break L3;
 F.line = 3717;
 i_56236 = i_56240;
-F.line = 112;
+F.line = 115;
 effects_56226[chckIndx(i_56236, 0, effects_56226.length)-0] = newNeighborTileEffect_56089();
 i_56240 = addInt(i_56240, 1);
 }
@@ -711,7 +711,7 @@ function nTiles_56247(grid_56249) {
 var result_56250 = 0;
 var F={procname:"logic.nTiles",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 119;
+F.line = 122;
 result_56250 = mulInt(grid_56249.width, grid_56249.width);
 framePtr = F.prev;
 return result_56250;
@@ -776,9 +776,9 @@ var result_56104 = null;
 var F={procname:"logic.newLinearTileEffect",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
 result_56104 = {m_type: NTI56028, direction: 0, ignoreEmpty: false};
-F.line = 93;
+F.line = 96;
 result_56104.direction = dir_56102;
-F.line = 94;
+F.line = 97;
 result_56104.ignoreEmpty = ignoreEmpty_56103;
 framePtr = F.prev;
 return result_56104;
@@ -788,7 +788,7 @@ function newLinearTileEffect_56113() {
 var result_56115 = null;
 var F={procname:"logic.newLinearTileEffect",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 96;
+F.line = 99;
 result_56115 = newLinearTileEffect_56100(chckRange(random_50282(6), 0, 5), (random_50282(2) == 0));
 framePtr = F.prev;
 return result_56115;
@@ -799,14 +799,14 @@ var Tmp5;
 var F={procname:"logic.randomize",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
 L1: do {
-F.line = 137;
+F.line = 140;
 var i_56306 = 0;
 L2: do {
-F.line = 125;
+F.line = 128;
 var i_56324 = 0;
 F.line = 3714;
 var colontmp__56326 = 0;
-F.line = 125;
+F.line = 128;
 colontmp__56326 = nTiles_56247(grid_56305);
 F.line = 3715;
 var i_56328 = 0;
@@ -816,11 +816,11 @@ L4: while (true) {
 if (!(i_56328 < colontmp__56326)) break L4;
 F.line = 3717;
 i_56324 = i_56328;
-F.line = 126;
+F.line = 129;
 i_56306 = i_56324;
-F.line = 138;
+F.line = 141;
 grid_56305.tileStates[chckIndx(i_56306, 0, grid_56305.tileStates.length)-0] = chckRange(random_50282(3), 0, 2);
-F.line = 139;
+F.line = 142;
 if ((random_50282(2) == 0)) {
 Tmp5 = newNeighborTileEffect_56089();
 }
@@ -1094,7 +1094,7 @@ var Tmp1;
 var result_56297 = false;
 var F={procname:"logic.inside",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 132;
+F.line = 135;
 if (!(0 <= ind_56296)) Tmp1 = false; else {Tmp1 = (ind_56296 < nTiles_56247(grid_56295)); }result_56297 = Tmp1;
 framePtr = F.prev;
 return result_56297;
@@ -1104,7 +1104,7 @@ function getStateAt_56578(grid_56580, ind_56581) {
 var result_56582 = 0;
 var F={procname:"logic.getStateAt",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 204;
+F.line = 207;
 result_56582 = grid_56580.tileStates[chckIndx(ind_56581, 0, grid_56580.tileStates.length)-0];
 framePtr = F.prev;
 return result_56582;
@@ -1114,7 +1114,7 @@ function X5BX5D__56588(grid_56590, ind_56591) {
 var result_56592 = 0;
 var F={procname:"logic.[]",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 207;
+F.line = 210;
 result_56592 = getStateAt_56578(grid_56590, ind_56591);
 framePtr = F.prev;
 return result_56592;
@@ -1124,7 +1124,7 @@ function isEmptyAt_56618(grid_56620, ind_56621) {
 var result_56622 = false;
 var F={procname:"logic.isEmptyAt",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 216;
+F.line = 219;
 result_56622 = (X5BX5D__56588(grid_56620, ind_56621) == 0);
 framePtr = F.prev;
 return result_56622;
@@ -1134,7 +1134,7 @@ function isVoidAt_56658(grid_56660, ind_56661) {
 var result_56662 = false;
 var F={procname:"logic.isVoidAt",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 222;
+F.line = 225;
 result_56662 = (!(inside_56293(grid_56660, ind_56661)) || isEmptyAt_56618(grid_56660, ind_56661));
 framePtr = F.prev;
 return result_56662;
@@ -1144,9 +1144,9 @@ function newCoords_56242(x_56244, y_56245) {
 var result_56246 = {x: 0, y: 0};
 var F={procname:"logic.newCoords",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 116;
+F.line = 119;
 result_56246.x = x_56244;
-F.line = 117;
+F.line = 120;
 result_56246.y = y_56245;
 framePtr = F.prev;
 return result_56246;
@@ -1156,7 +1156,7 @@ function ind2Coords_56251(grid_56253, ind_56254) {
 var result_56255 = {x: 0, y: 0};
 var F={procname:"logic.ind2Coords",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 121;
+F.line = 124;
 nimCopy(result_56255, newCoords_56242(modInt(ind_56254, grid_56253.width), divInt(ind_56254, grid_56253.width)), NTI56014);
 framePtr = F.prev;
 return result_56255;
@@ -1168,7 +1168,7 @@ var F={procname:"logic.actionAt",prev:framePtr,filename:"hexcapepkg/logic.nim",l
 framePtr = F;
 if (!(isVoidAt_56658(grid_56815, ind_56816))) {
 affect_56066(grid_56815.tileEffects[chckIndx(ind_56816, 0, grid_56815.tileEffects.length)-0], grid_56815, ind2Coords_56251(grid_56815, ind_56816));
-F.line = 259;
+F.line = 262;
 result_56817 = true;
 }
 
@@ -1180,7 +1180,7 @@ function coords2Ind_56256(grid_56258, coords_56259) {
 var result_56260 = 0;
 var F={procname:"logic.coords2Ind",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 122;
+F.line = 125;
 result_56260 = addInt(coords_56259.x, mulInt(coords_56259.y, grid_56258.width));
 framePtr = F.prev;
 return result_56260;
@@ -1190,7 +1190,7 @@ function actionAt_56818(grid_56820, coords_56821) {
 var result_56822 = false;
 var F={procname:"logic.actionAt",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 260;
+F.line = 263;
 result_56822 = actionAt_56813(grid_56820, coords2Ind_56256(grid_56820, coords_56821));
 framePtr = F.prev;
 return result_56822;
@@ -1200,7 +1200,7 @@ function isRaisedAt_56638(grid_56640, ind_56641) {
 var result_56642 = false;
 var F={procname:"logic.isRaisedAt",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 219;
+F.line = 222;
 result_56642 = (X5BX5D__56588(grid_56640, ind_56641) == 2);
 framePtr = F.prev;
 return result_56642;
@@ -1211,17 +1211,17 @@ var result_56826 = false;
 var F={procname:"logic.isWin",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
 BeforeRet: do {
-F.line = 263;
+F.line = 266;
 result_56826 = true;
 L1: do {
-F.line = 264;
+F.line = 267;
 var ind_56827 = 0;
 L2: do {
-F.line = 125;
+F.line = 128;
 var i_56832 = 0;
 F.line = 3714;
 var colontmp__56834 = 0;
-F.line = 125;
+F.line = 128;
 colontmp__56834 = nTiles_56247(grid_56825);
 F.line = 3715;
 var i_56836 = 0;
@@ -1231,12 +1231,12 @@ L4: while (true) {
 if (!(i_56836 < colontmp__56834)) break L4;
 F.line = 3717;
 i_56832 = i_56836;
-F.line = 126;
+F.line = 129;
 ind_56827 = i_56832;
 if ((!(isEmptyAt_56618(grid_56825, ind_56827)) && !(isRaisedAt_56638(grid_56825, ind_56827)))) {
-F.line = 266;
+F.line = 269;
 result_56826 = false;
-F.line = 267;
+F.line = 270;
 break BeforeRet;
 }
 
@@ -1331,7 +1331,7 @@ function getEffectAt_56730(grid_56732, ind_56733) {
 var result_56734 = null;
 var F={procname:"logic.getEffectAt",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 239;
+F.line = 242;
 result_56734 = grid_56732.tileEffects[chckIndx(ind_56733, 0, grid_56732.tileEffects.length)-0];
 framePtr = F.prev;
 return result_56734;
@@ -1541,19 +1541,19 @@ framePtr = F;
 L1: do {
 F.line = 121;
 var coords_58318 = {x: 0, y: 0};
-F.line = 128;
+F.line = 131;
 var colontmp__58417 = null;
 F.line = 121;
 colontmp__58417 = game_58317.grid;
 L2: do {
-F.line = 129;
+F.line = 132;
 var i_58422 = 0;
 L3: do {
-F.line = 125;
+F.line = 128;
 var i_58424 = 0;
 F.line = 3714;
 var colontmp__58426 = 0;
-F.line = 125;
+F.line = 128;
 colontmp__58426 = nTiles_56247(colontmp__58417);
 F.line = 3715;
 var i_58428 = 0;
@@ -1563,9 +1563,9 @@ L5: while (true) {
 if (!(i_58428 < colontmp__58426)) break L5;
 F.line = 3717;
 i_58424 = i_58428;
-F.line = 126;
+F.line = 129;
 i_58422 = i_58424;
-F.line = 130;
+F.line = 133;
 coords_58318 = ind2Coords_56251(colontmp__58417, i_58422);
 L6: do {
 F.line = 123;
@@ -1672,7 +1672,7 @@ function setStateAt_56598(grid_56600, ind_56601, newState_56602) {
 
 var F={procname:"logic.setStateAt",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 210;
+F.line = 213;
 grid_56600.tileStates[chckIndx(ind_56601, 0, grid_56600.tileStates.length)-0] = newState_56602;
 framePtr = F.prev;
 }
@@ -1702,7 +1702,7 @@ function plus__56393(p1_56395, p2_56396) {
 var result_56397 = {x: 0, y: 0};
 var F={procname:"logic.+",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 179;
+F.line = 182;
 nimCopy(result_56397, newCoords_56242(addInt(p1_56395.x, p2_56396.x), addInt(p1_56395.y, p2_56396.y)), NTI56014);
 framePtr = F.prev;
 return result_56397;
@@ -1715,7 +1715,7 @@ var Tmp3;
 var result_56302 = false;
 var F={procname:"logic.inside",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 134;
+F.line = 137;
 if (!(0 <= coords_56301.x)) Tmp3 = false; else {Tmp3 = (0 <= coords_56301.y); }if (!Tmp3) Tmp2 = false; else {Tmp2 = (coords_56301.x < grid_56300.width); }if (!Tmp2) Tmp1 = false; else {Tmp1 = (coords_56301.y < grid_56300.width); }result_56302 = Tmp1;
 framePtr = F.prev;
 return result_56302;
@@ -1725,7 +1725,7 @@ function isEmptyAt_56633(grid_56635, coords_56636) {
 var result_56637 = false;
 var F={procname:"logic.isEmptyAt",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 217;
+F.line = 220;
 result_56637 = isEmptyAt_56618(grid_56635, coords2Ind_56256(grid_56635, coords_56636));
 framePtr = F.prev;
 return result_56637;
@@ -1735,7 +1735,7 @@ function isVoidAt_56663(grid_56665, coords_56666) {
 var result_56667 = false;
 var F={procname:"logic.isVoidAt",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
-F.line = 223;
+F.line = 226;
 result_56667 = (!(inside_56298(grid_56665, coords_56666)) || isEmptyAt_56633(grid_56665, coords_56666));
 framePtr = F.prev;
 return result_56667;
@@ -1747,7 +1747,7 @@ var F={procname:"logic.affect",prev:framePtr,filename:"hexcapepkg/logic.nim",lin
 framePtr = F;
 flipStateAt_56684(grid_56748, coords_56749);
 L1: do {
-F.line = 245;
+F.line = 248;
 var opposite_56802 = false;
 F.line = 3523;
 var i_56810 = 0;
@@ -1759,7 +1759,7 @@ L3: while (true) {
 if (!(i_56810 < L_56812)) break L3;
 F.line = 3526;
 opposite_56802 = [false, true][chckIndx(i_56810, 0, [false, true].length)-0];
-F.line = 247;
+F.line = 250;
 if (opposite_56802) {
 Tmp4 = directions2Opposites_56341[chckIndx(e_56747.direction, 0, directions2Opposites_56341.length)-0];
 }
@@ -1768,16 +1768,16 @@ Tmp4 = e_56747.direction;
 }
 
 var dir_56803 = Tmp4;
-F.line = 248;
+F.line = 251;
 var offset_56804 = nimCopy(null, directions2CoordsOffsets_56381[chckIndx(dir_56803, 0, directions2CoordsOffsets_56381.length)-0], NTI56014);
-F.line = 249;
+F.line = 252;
 var next_56805 = plus__56393(coords_56749, offset_56804);
 L5: do {
-F.line = 252;
+F.line = 255;
 L6: while (true) {
 if (!!(isVoidAt_56663(grid_56748, next_56805))) break L6;
 flipStateAt_56684(grid_56748, next_56805);
-F.line = 254;
+F.line = 257;
 nimCopy(next_56805, plus__56393(next_56805, offset_56804), NTI56014);
 }
 } while(false);
@@ -1808,27 +1808,27 @@ function flipWithNeighbors_56688(grid_56690, ind_56691) {
 var F={procname:"logic.flipWithNeighbors",prev:framePtr,filename:"hexcapepkg/logic.nim",line:0};
 framePtr = F;
 L1: do {
-F.line = 235;
+F.line = 238;
 var neighbor_56692 = {x: 0, y: 0};
-F.line = 200;
+F.line = 203;
 var coords_56700 = ind2Coords_56251(grid_56690, ind_56691);
 L2: do {
-F.line = 201;
+F.line = 204;
 var neighbor_56702 = {x: 0, y: 0};
-F.line = 195;
+F.line = 198;
 neighbor_56702 = coords_56700;
-F.line = 202;
+F.line = 205;
 neighbor_56692 = neighbor_56702;
 flipStateAt_56684(grid_56690, neighbor_56692);
 L3: do {
-F.line = 196;
+F.line = 199;
 var neighbor_56704 = {x: 0, y: 0};
 L4: do {
-F.line = 86;
+F.line = 89;
 var i_56706 = 0;
 F.line = 2074;
 var colontmp__56708 = {a: 0, b: 0};
-F.line = 86;
+F.line = 89;
 colontmp__56708 = dotdot__38470(0, 5);
 L5: do {
 F.line = 2077;
@@ -1851,18 +1851,18 @@ F.line = 1927;
 x_56710 = res_56716;
 F.line = 2078;
 i_56706 = x_56710;
-F.line = 87;
+F.line = 90;
 var dir_56721 = chckRange(i_56706, 0, 5);
-F.line = 184;
+F.line = 187;
 var offset_56723 = nimCopy(null, directions2CoordsOffsets_56381[chckIndx(dir_56721, 0, directions2CoordsOffsets_56381.length)-0], NTI56014);
-F.line = 185;
+F.line = 188;
 var neighCand_56725 = plus__56393(coords_56700, offset_56723);
 if (inside_56298(grid_56690, neighCand_56725)) {
-F.line = 187;
+F.line = 190;
 neighbor_56704 = neighCand_56725;
-F.line = 197;
+F.line = 200;
 neighbor_56702 = neighbor_56704;
-F.line = 202;
+F.line = 205;
 neighbor_56692 = neighbor_56702;
 flipStateAt_56684(grid_56690, neighbor_56692);
 }

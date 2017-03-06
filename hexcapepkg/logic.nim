@@ -2,10 +2,12 @@ import math
 import random
 import basic2d
 
-#        ===================
+#         Grid coordinates
+#
+# (y)    ===================
 # row  //                   \\
 # 0 => ||   0 - 1 - 2 - 3   ||
-#      ||   |   | / | / |   ||
+#      ||   | / | / | / |   ||
 # 1 => ||   4 - 5 - 6 - 7   ||
 #      ||   | / | / | / |   ||
 # 2 => ||   8 - 9 -10 -11   ||
@@ -14,7 +16,7 @@ import basic2d
 #      \\                   //
 #        ===================
 #           ^   ^   ^   ^
-#           |   |   |   |
+#      (x)  |   |   |   |
 #      col  0   1   2   3
 
 # ====        Neighbor offsets        ====
@@ -22,7 +24,7 @@ import basic2d
 #                (x  , y-1)     (x+1, y-1)
 #                    ||       //
 #                    ||      //
-#  top-left          ||     //   
+#  top-left          ||     //
 # (x-1, y  ) ==  (x  , y  )  == (x+1, y  )
 #               // center      bottom-right
 #              //    ||
@@ -32,6 +34,7 @@ import basic2d
 #    left        bottom-left
 # ========================================
 
+# Screen coordinates
 #        / \
 #       | 0 |
 #      / \ / \
@@ -40,15 +43,15 @@ import basic2d
 #   | 8 | 5 | 2 |
 #  / \ / \ / \ / \
 # | 12| 9 | 6 | 3 |
-#  \ / \ / \ / \ / 
-#   | 13| 10| 7 | 
+#  \ / \ / \ / \ /
+#   | 13| 10| 7 |
 #    \ / \ / \ /
 #     | 14| 11|
 #      \ / \ /
 #       | 15|
-#        \ / 
+#        \ /
 
-type 
+type
     # directions in clockwise order
     HexDirection* {.pure.} = enum
         bottomLeft,
@@ -70,7 +73,7 @@ type
         width*: int
         tileStates: seq[TileState]
         tileEffects: seq[TileEffect]
-    
+
     Coords* = object
         x*, y*: int
 
@@ -112,7 +115,7 @@ proc newHexGrid*(width: int): HexGrid =
         effects[i] = newNeighborTileEffect()
     newHexGrid(width, states, effects)
 
-proc newCoords*(x, y: int): Coords = 
+proc newCoords*(x, y: int): Coords =
     result.x = x
     result.y = y
 
@@ -121,11 +124,11 @@ proc nTiles(grid: HexGrid): int = grid.width * grid.width
 proc ind2Coords*(grid: HexGrid, ind: int): Coords = newCoords(ind mod grid.width, ind div grid.width)
 proc coords2Ind*(grid: HexGrid, coords: Coords): int = coords.x + coords.y * grid.width
 
-iterator indices*(grid: HexGrid): int = 
+iterator indices*(grid: HexGrid): int =
     for i in 0 ..< grid.nTiles:
         yield i
 
-iterator coords*(grid: HexGrid): Coords = 
+iterator coords*(grid: HexGrid): Coords =
     for i in grid.indices:
         yield grid.ind2Coords(i)
 
@@ -145,7 +148,7 @@ const directions2Angles*: array[HexDirection, float] = [
     HexDirection.topLeft:      240.0.degToRad,
     HexDirection.topRight:     300.0.degToRad,
     HexDirection.right:          0.0.degToRad,
-    HexDirection.bottomRight:   60.0.degToRad 
+    HexDirection.bottomRight:   60.0.degToRad
 ]
 const directions2Opposites*: array[HexDirection, HexDirection] = [
     HexDirection.bottomLeft:   HexDirection.topRight,
@@ -153,7 +156,7 @@ const directions2Opposites*: array[HexDirection, HexDirection] = [
     HexDirection.topLeft:      HexDirection.bottomRight,
     HexDirection.topRight:     HexDirection.bottomLeft,
     HexDirection.right:        HexDirection.left,
-    HexDirection.bottomRight:  HexDirection.topLeft 
+    HexDirection.bottomRight:  HexDirection.topLeft
 ]
 const directions2Vectors*: array[HexDirection, Vector2d] = [
     HexDirection.bottomLeft:   polarVector2d(directions2Angles[HexDirection.bottomLeft],  1.0),
@@ -161,7 +164,7 @@ const directions2Vectors*: array[HexDirection, Vector2d] = [
     HexDirection.topLeft:      polarVector2d(directions2Angles[HexDirection.topLeft],     1.0),
     HexDirection.topRight:     polarVector2d(directions2Angles[HexDirection.topRight],    1.0),
     HexDirection.right:        polarVector2d(directions2Angles[HexDirection.right],       1.0),
-    HexDirection.bottomRight:  polarVector2d(directions2Angles[HexDirection.bottomRight], 1.0) 
+    HexDirection.bottomRight:  polarVector2d(directions2Angles[HexDirection.bottomRight], 1.0)
 ]
 const
     forwardVector*   = directions2Vectors[HexDirection.bottomRight]
@@ -271,7 +274,7 @@ when isMainModule:
 
     for i in 0 .. hexGrid.nTiles:
         let coords = hexGrid.ind2Coords(i)
-        stdout.write $i & "(" & $coords & " = " & $hexGrid.coords2Ind(coords) & ") -> " 
+        stdout.write $i & "(" & $coords & " = " & $hexGrid.coords2Ind(coords) & ") -> "
         for neighbor in hexGrid.getNeighborTiles(i):
             stdout.write $hexGrid.coords2Ind(neighbor) & ", "
         echo ""
